@@ -7,6 +7,8 @@ import { recordRequestLog } from "../requestLog"
 import { CharEmotion } from "../stores.svelte"
 import type { OpenAIChat } from "./index.svelte"
 import { processZip } from "./processzip"
+import { resolveActiveComfyWorkflow } from "./comfyWorkflows"
+import { language } from "src/lang"
 import random from "lodash/random"
 
 function describeFormData(formData: FormData): string {
@@ -527,6 +529,30 @@ export async function generateAIImage(genPrompt:string, currentChar:character, n
     if(db.sdProvider === 'comfy' || db.sdProvider === 'comfyui'){
         const legacy = db.sdProvider === 'comfy' // Legacy Comfy mode
         const {workflow, posNodeID, posInputName, negNodeID, negInputName} = db.comfyConfig
+        // Legacy mode keeps its single workflow from comfyConfig; the
+        // multi-workflow mode resolves the active preset instead.
+        const preset = legacy
+            ? { id: '', name: 'Legacy', workflow, timeout: db.comfyConfig.timeout }
+            : resolveActiveComfyWorkflow(db.comfyWorkflows ?? [], db.comfyActiveWorkflowId ?? '')
+        if(!preset){
+            notifyError('No ComfyUI workflow is configured. Add one in Settings > Other Bots > Image Generation.')
+            return false
+        }
+        if(!legacy){
+            // Surface a broken active workflow as a clear message instead of a
+            // raw JSON.parse error from the generic catch below.
+            if(preset.workflow.trim() === ''){
+                notifyError(language.comfyWorkflows.invalidActiveWorkflow.replace("{name}", preset.name))
+                return false
+            }
+            try {
+                JSON.parse(preset.workflow)
+            }
+            catch {
+                notifyError(language.comfyWorkflows.invalidActiveWorkflow.replace("{name}", preset.name))
+                return false
+            }
+        }
         const baseUrl = new URL(db.comfyUiUrl)
 
         const createUrl = (pathname: string, params: Record<string, string> = {}) => {
@@ -549,7 +575,7 @@ export async function generateAIImage(genPrompt:string, currentChar:character, n
         }
 
         try {
-            const prompt = JSON.parse(workflow)
+            const prompt = JSON.parse(preset.workflow)
             if(legacy){
                 prompt[posNodeID].inputs[posInputName] = genPrompt
                 prompt[negNodeID].inputs[negInputName] = neg
@@ -586,7 +612,7 @@ export async function generateAIImage(genPrompt:string, currentChar:character, n
             let item
 
             const startTime = Date.now()
-            const timeout = db.comfyConfig.timeout * 1000
+            const timeout = (preset.timeout || 30) * 1000
             while (!(item = (await (await fetchNative(createUrl('/history'), {
                 headers: { 'Content-Type': 'application/json' },
                 method: 'GET'

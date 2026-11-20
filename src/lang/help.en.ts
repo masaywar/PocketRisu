@@ -199,7 +199,8 @@ export const helpEn = {
             "If it is not blank, the preset will be changed and applied randomly every time when user sends a message in the preset list in this input. preset list should be seperated by comma, for example, `preset1,preset2`.",
         legacyMediaFindings: "If enabled, it will use the old method to find media assets, without using the additional search algorithm.",
         comfyWorkflow:
-            "Put the API workflow of comfy UI. you can get your API workflow in comfy UI by pressing the 'Workflow > Export (API)' button. you must also put {{risu_prompt}} in you workflow text. the {{risu_prompt}} will be replaced with the prompt provided by the Risu.",
+            "Manage your ComfyUI API workflows. Export one from ComfyUI via 'Workflow > Export (API)', paste the JSON here, and put {{risu_prompt}} / {{risu_neg}} placeholders where the prompts go. The active workflow is used for image generation.",
+        comfyActiveWorkflow: "The workflow used when generating images with ComfyUI.",
         automaticCachePoint: "Automatically creates cache point after the chat ends, if the caching point doesn't exist.",
         experimentalChatCompressionDesc:
             "Compresses the unused chat data and saves in seperate file. this greatly reduces the size of the chat data, and greatly improves the performance, however its experimental and can be unstable, causing issues in backup feature and more.",
