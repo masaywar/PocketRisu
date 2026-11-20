@@ -14,6 +14,7 @@ import type { PromptItem, PromptSettings } from '../process/prompt';
 import type { OobaChatCompletionRequestParams } from '../model/ooba';
 import { type HypaV3Settings, type HypaV3Preset, createHypaV3Preset } from '../process/memory/hypav3Preset'
 import { migrateMemoryPresets, MEMORY_PRESET_DEFAULT, type MemoryPreset } from '../process/memory/memoryPresets'
+import { legacyComfyWorkflowToPreset } from '../process/comfyWorkflows'
 import { normalizeTranslatorPresetState, type TranslatorPreset } from '../translator/presets'
 import { safeStructuredClone } from '../polyfill';
 import { v4 as uuidv4 } from 'uuid';
@@ -602,6 +603,16 @@ export function setDatabase(data:Database){
         negNodeID: '',
         negInputName: 'text',
         timeout: 30
+    }
+    data.comfyWorkflows ??= []
+    data.comfyActiveWorkflowId ??= ''
+    // One-time import of the legacy single workflow into the preset list.
+    if(data.comfyWorkflows.length === 0 && data.comfyConfig.workflow.trim() !== ''){
+        const preset = legacyComfyWorkflowToPreset(data.comfyConfig)
+        if(preset){
+            data.comfyWorkflows.push(preset)
+            data.comfyActiveWorkflowId = preset.id
+        }
     }
     data.hideApiKey ??= true
     data.unformatQuotes ??= false
@@ -1385,6 +1396,8 @@ export interface Database{
     stabllityStyle: string
     legacyTranslation: boolean
     comfyConfig: ComfyConfig
+    comfyWorkflows: ComfyWorkflowPreset[]
+    comfyActiveWorkflowId: string
     comfyUiUrl: string
     useLegacyGUI: boolean
     claudeCachingExperimental: boolean
@@ -2264,6 +2277,13 @@ interface ComfyConfig{
     negNodeID: string,
     negInputName:string,
     timeout: number
+}
+
+export interface ComfyWorkflowPreset {
+    id: string       // unique, generate with uuidv4()
+    name: string
+    workflow: string // ComfyUI API workflow JSON text
+    timeout: number  // seconds
 }
 
 export type FormatingOrderItem = 'main'|'jailbreak'|'chats'|'lorebook'|'globalNote'|'authorNote'|'lastChat'|'description'|'postEverything'|'personaPrompt'

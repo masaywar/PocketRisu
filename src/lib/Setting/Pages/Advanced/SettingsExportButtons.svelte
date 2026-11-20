@@ -51,7 +51,7 @@
             'characters', 'loreBook', 'plugins', 'account', 'personas', 'username', 'userIcon', 'userNote',
             'modules', 'enabledModules', 'botPresets', 'characterOrder', 'webUiUrl', 'characterOrder',
             'hordeConfig', 'novelai', 'koboldURL', 'ooba', 'ainconfig', 'personaPrompt', 'promptTemplate',
-            'deeplOptions', 'google', 'customPromptTemplateToggle', 'globalChatVariables', 'comfyConfig',
+            'deeplOptions', 'google', 'customPromptTemplateToggle', 'globalChatVariables', 'comfyConfig', 'comfyWorkflows', 'comfyActiveWorkflowId',
             'comfyUiUrl', 'translatorPrompt', 'translatorPresets', 'translatorPresetId', 'customModels', 'mcpURLs', 'authRefreshes'
         ]
         for(const key in db) {

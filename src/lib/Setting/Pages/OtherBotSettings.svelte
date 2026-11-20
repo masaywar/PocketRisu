@@ -8,6 +8,7 @@
     import ShButton from "src/lib/UI/GUI/ShButton.svelte";
     import ShAlert from "src/lib/UI/GUI/ShAlert.svelte";
     import SettingRowLayout from "src/lib/Setting/Wrappers/SettingRowLayout.svelte";
+    import ComfyWorkflowManager from "src/lib/Setting/Pages/ComfyWorkflowManager.svelte";
     import type { SettingItem } from "src/ts/setting/types";
     import { TriangleAlertIcon } from "@lucide/svelte";
     import { selectSingleFile } from "src/ts/util";
@@ -689,13 +690,7 @@
     {#snippet control()}<TextInput className="sm:w-64 h-8" size="sm" padding fullwidth placeholder="http://127.0.0.1:8188" bind:value={DBState.db.comfyUiUrl}/>{/snippet}
 </SettingRowLayout>
 
-            <SettingRowLayout item={f('ob24', `Workflow`, 'comfyWorkflow')} wideControl>
-    {#snippet control()}<TextInput className="sm:w-64 h-8" size="sm" padding fullwidth bind:value={DBState.db.comfyConfig.workflow}/>{/snippet}
-</SettingRowLayout>
-
-            <SettingRowLayout item={f('ob12', `Timeout (sec)`, 'comfyTimeout')}>
-    {#snippet control()}<NumberInput className="w-24" size="sm" padding bind:value={DBState.db.comfyConfig.timeout} min={1} max={120}/>{/snippet}
-</SettingRowLayout>
+            <ComfyWorkflowManager />
         {/if}
 
         {#if DBState.db.sdProvider === 'comfy'}
